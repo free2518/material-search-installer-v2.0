@@ -163,10 +163,21 @@ class Scanner:
                 self.scanned = True  # 表示本目标时间段内已进行扫描，防止同个时间段内扫描多次
                 self.scan(True)
 
+    def handle_image_batch(self, session, image_batch_dict):
+        path_list, features_list = process_images(list(image_batch_dict.keys()))
+        if not path_list or features_list is None:
+            return
+        for path, features in zip(path_list, features_list):
+            # 写入数据库，不删除原有记录
+            features = features.tobytes()
+            modify_time = image_batch_dict[path]
+            add_image(session, path, modify_time, features)
+            self.assets.remove(path)
+        self.total_images = get_image_count(session)
+
     def scan(self, auto=False):
         """
-        扫描资源。如果存在assets.pickle，则直接读取并开始扫描。如果不存在，则先读取所有文件路径，并写入assets.pickle，然后开始扫描。
-        每100个文件重新保存一次assets.pickle，如果程序被中断，下次可以从断点处继续扫描。扫描完成后删除assets.pickle并清缓存。
+        扫描资源。支持增量扫描，使用 NEW_SCAN_PATH 时会保留原有数据。
         :param auto: 是否由AUTO_SCAN触发的
         """
         self.logger.info("开始扫描")
@@ -174,8 +185,8 @@ class Scanner:
         self.scan_start_time = time.time()
         self.generate_or_load_assets()
         with DatabaseSession() as session:
-            # 删除不存在的文件记录
-            if not self.is_continue_scan:  # 非断点恢复的情况下才删除
+            # 只在非增量扫描且不是使用 NEW_SCAN_PATH 时才删除不存在的文件记录
+            if not self.is_continue_scan and not any(NEW_SCAN_PATH):
                 delete_record_if_not_exist(session, self.assets)
             # 扫描文件
             image_batch_dict = {}  # 批量处理文件的字典，用字典方便某个图片有问题的时候的处理
