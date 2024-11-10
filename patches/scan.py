@@ -171,7 +171,11 @@ class Scanner:
             # 写入数据库，不删除原有记录
             features = features.tobytes()
             modify_time = image_batch_dict[path]
-            add_image(session, path, modify_time, features)
+            if any(NEW_SCAN_PATH):  # 增量扫描时不删除原有记录
+                add_image(session, path, modify_time, features)
+            else:
+                delete_image_if_outdated(session, path)
+                add_image(session, path, modify_time, features)
             self.assets.remove(path)
         self.total_images = get_image_count(session)
 
@@ -204,22 +208,28 @@ class Scanner:
                 modify_time = datetime.datetime.fromtimestamp(modify_time)
                 # 如果数据库里有这个文件，并且修改时间一致，则跳过，否则进行预处理并入库
                 if path.lower().endswith(IMAGE_EXTENSIONS):  # 图片
-                    not_modified = delete_image_if_outdated(session, path)
-                    if not_modified:
-                        self.assets.remove(path)
-                        continue
-                    image_batch_dict[path] = modify_time
+                    if any(NEW_SCAN_PATH):  # 增量扫描时不删除原有记录
+                        image_batch_dict[path] = modify_time
+                    else:
+                        not_modified = delete_image_if_outdated(session, path)
+                        if not_modified:
+                            self.assets.remove(path)
+                            continue
+                        image_batch_dict[path] = modify_time
                     # 达到SCAN_PROCESS_BATCH_SIZE再进行批量处理
                     if len(image_batch_dict) == SCAN_PROCESS_BATCH_SIZE:
                         self.handle_image_batch(session, image_batch_dict)
                         image_batch_dict = {}
                     continue
                 elif path.lower().endswith(VIDEO_EXTENSIONS):  # 视频
-                    not_modified = delete_video_if_outdated(session, path)
-                    if not_modified:
-                        self.assets.remove(path)
-                        continue
-                    add_video(session, path, modify_time, process_video(path))
+                    if any(NEW_SCAN_PATH):  # 增量扫描时不删除原有记录
+                        add_video(session, path, modify_time, process_video(path))
+                    else:
+                        not_modified = delete_video_if_outdated(session, path)
+                        if not_modified:
+                            self.assets.remove(path)
+                            continue
+                        add_video(session, path, modify_time, process_video(path))
                     self.total_video_frames = get_video_frame_count(session)
                     self.total_videos = get_video_count(session)
                 self.assets.remove(path)
