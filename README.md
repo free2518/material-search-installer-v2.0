@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/8a6ab27f-f323-41ab-920d-9571a9b1465b)# material-search-installer-v2.0
+
 增加增量扫描功能的 MaterialSearch 安装器
 # MaterialSearch MacOS 一键安装脚本
 
