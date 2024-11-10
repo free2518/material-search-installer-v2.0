@@ -12,7 +12,7 @@ rm -rf ~/MaterialSearch
 打开终端，复制并运行以下命令：
 
 ```
-curl -fsSL https://raw.githubusercontent.com/free2518/material-search-installer/main/install_material_search.sh | bash
+curl -fsSL https://github.com/free2518/material-search-installer-v2.0/tree/main/install_material_search.sh | bash
 ```
 
 ## 功能特点
