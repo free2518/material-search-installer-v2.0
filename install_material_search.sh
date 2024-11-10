@@ -46,6 +46,9 @@ fi
 
 # 添加增量扫描功能
 echo "正在应用增量扫描补丁..."
+mkdir -p patches
+curl -fsSL https://raw.githubusercontent.com/free2518/material-search-installer-v2.0/main/patches/config.py > patches/config.py || handle_error "配置文件下载失败"
+curl -fsSL https://raw.githubusercontent.com/free2518/material-search-installer-v2.0/main/patches/scan.py > patches/scan.py || handle_error "扫描文件下载失败"
 cp patches/config.py . || handle_error "配置文件复制失败"
 cp patches/scan.py . || handle_error "扫描文件复制失败"
 
