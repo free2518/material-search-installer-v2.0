@@ -1,4 +1,4 @@
-# material-search-installer-v2.0
+![image](https://github.com/user-attachments/assets/8a6ab27f-f323-41ab-920d-9571a9b1465b)# material-search-installer-v2.0
 增加增量扫描功能的 MaterialSearch 安装器
 # MaterialSearch MacOS 一键安装脚本
 
@@ -12,7 +12,7 @@ rm -rf ~/MaterialSearch
 打开终端，复制并运行以下命令：
 
 ```
-curl -fsSL https://github.com/free2518/material-search-installer-v2.0/tree/main/install_material_search.sh | bash
+curl -fsSL https://raw.githubusercontent.com/free2518/material-search-installer-v2.0/main/install_material_search.sh | bash
 ```
 
 ## 功能特点
